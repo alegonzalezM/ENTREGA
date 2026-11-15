@@ -1,25 +1,25 @@
-import { getAllProductsService, getProductByIdService } from "../services/productService.js";
+import { getAllProductsService, getProductByIdService, createProductService, deleteProductService} from "../services/productService.js";
 
 export async function getAllProducts(req,res) {
  
-     const category = req.query.categoria?.toLowerCase();     
+     const categoria = req.query.categoria?.toLowerCase();     
     //   console.log("req.query completo:", req.query);
-      console.log("category:", category);
+      console.log("categoria:", categoria);
     try{
-     const products = await getAllProductsService(category);       
+     const products = await getAllProductsService(categoria);       
         if(products.length>0){
-            res.status(200).send({
+            return res.status(200).json({
                 message: "Productos encontrados: ",
                 data: products
             }
     )} else {
-        res.status(404).send({
+        return res.status(404).json({
             message: "No se encontraron productos"
         })
      }
     } catch(e){
          console.log(e.stack);
-        res.status(500).send({
+        res.status(500).json({
             
             message: "Error en la solicitud (controlador): " + e.message })
     }}
@@ -31,24 +31,42 @@ export const getProductsById = async (req,res) => {   //se verifica acá poraue 
         if (!id) {
         return res.status(400).json({ message: "El ID es obligatorio" });
         }   
-    const product= await getProductByIdService(id)
+    const product= await getProductByIdService(id);
     if(product){
-    res.status(200).json({ message: 'Producto encontrado: ' , 
+    return res.status(200).json({ message: 'Producto encontrado: ' , 
                            data:  product })
 } else {
-    res.status(400).json({ message:"No se encontró el producto"} )
+    return res.status(404).json({ message:"No se encontró el producto"} )
 }} catch(e){
-        res.status(500).send({
+        res.status(500).json({
             message: "Error en la solicitud : " + e.message })
     }}
 
-//     API Open BYMA Data (oficial, sin key)
-// Es la más completa. BYMA expone endpoints públicos con 20 min de demora:
+export async function createProduct(req, res) {
+  try {
+    const { nombre, precio, categoria, marca, stock } = req.body;
 
-// CEDEARs: https://open.bymadata.com.ar/vanoms-be-core/rest/api/bymadata/free/cedears
-// Bonos públicos: https://open.bymadata.com.ar/vanoms-be-core/rest/api/bymadata/free/public-bonds
-// También hay endpoints para acciones, índices y datos históricos. 
-// Librerías de terceros que consumen esta API:
+    if (!nombre || !precio) {
+      return res.status(400).json({ message: "El nombre y el precio son obligatorios" });
+    }
 
-// PyOBD (Python): pip install PyOBD — sin autenticación
-// openbymadata (Go): github.com/carvalab/openbymadata
+    const newProduct = await createProductService({ nombre, precio, categoria, marca, stock });
+    res.status(201).json({ message: "Producto creado:", data: newProduct });
+  } catch (e) {
+    res.status(500).json({ message: "Error en la solicitud: " + e.message });
+  }
+}   
+
+export async function deleteProduct(req, res) {
+  try {
+    const id = req.params.id;
+    const deleted = await deleteProductService(id);
+    if (deleted) {
+      return res.status(200).json({ message: "Producto eliminado" });
+    } else {
+      return res.status(404).json({ message: "No se encontró el producto" });
+    }
+  } catch (e) {
+    res.status(500).json({ message: "Error en la solicitud: " + e.message });
+  }
+}

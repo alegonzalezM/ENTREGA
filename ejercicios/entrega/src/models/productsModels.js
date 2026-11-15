@@ -1,29 +1,33 @@
-import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-import {db} from '../../data/data.js';
+// src/models/productsModels.js
+import { db } from '../../data/data.js';
+import { collection, getDocs, getDoc, doc, addDoc, deleteDoc, query, where } from 'firebase/firestore';
 
-export const obtenerProductos = async (nombreColleccion) => {  //reemplaza funcion getProducts de productsService
-  try{
-    const querySnapshot = await getDocs(collection(db, "products"));
-    return querySnapshot.docs.map(d =>({ id: d.id, ...d.data() }) );
-  } catch (error){
-    console.error(`Error obteniendo la colección ${nombreColleccion}: ` , error);
-    throw error;
-  }
-}
-// import fs from 'fs';
-// import path from 'path';
-// import { fileURLToPath } from 'url';
+const col = collection(db, 'products');
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-// const rutaArchivo = path.join(__dirname, 'data/products.json');
+export const obtenerProductos = async () => {
+  const snapshot = await getDocs(col);
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+};
 
-// export function getProducts() {
-//   try {
-//     const data = fs.readFileSync(rutaArchivo, 'utf-8');
-//     return JSON.parse(data);
-//   } catch (err) {
-//     console.error('Error al leer el archivo:', err);
-//     return null;
-//   }
-// }   
+export const obtenerPorId = async (id) => {
+  const d = await getDoc(doc(db, 'products', id));
+  return d.exists() ? { id: d.id, ...d.data() } : null;
+};
+
+export const buscarPorConsulta = async (categoria) => {
+  const q = query(col, where('categoria', '==', categoria));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+export const crearProducto = async (data) => {
+  const ref = await addDoc(col, { ...data, createdAt: new Date().toISOString() });
+  return { id: ref.id, ...data };
+};
+
+export const eliminarProducto = async (id) => {
+  const d = await getDoc(doc(db, 'products', id));
+  if (!d.exists()) return null;
+  await deleteDoc(d.ref);
+  return true;
+};   
