@@ -21,7 +21,8 @@ El token obtenido utilizarlo en pestaña Authorization (Bearer Token) para reali
 ## Endpoints:
 Todas requieren header Authorization: Bearer <token>.
 
-GET http://localhost:3007/auth/api/products — lista productos (opcional: ?categoria=indumentaria)
+GET http://localhost:3007/auth/api/products — lista productos 
+GET http://localhost:3007/auth/api/products/?categoria=calzado - obtiene productos de un sola categoria
 GET http://localhost:3007/auth/api/products/:id — producto por ID
 POST http://localhost:3007/auth/api/products/create — crear producto
 
