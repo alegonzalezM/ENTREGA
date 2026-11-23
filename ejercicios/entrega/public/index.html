@@ -49,7 +49,7 @@ async function login() {
     })
   });
   if (r.ok) {
-    token = (await r.json()).token;
+    token = (await r.json()).data.token;
     document.getElementById('login').classList.add('hidden');
     document.getElementById('crud').classList.remove('hidden');
     listar();
