@@ -23,6 +23,9 @@
         border: 1px solid #bcbcc0; 
         padding: 6px; 
         text-align: left; }
+    th{
+        text-align: center;
+    }
     .toRight{
         text-align: right;
     }

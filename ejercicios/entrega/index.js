@@ -1,16 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import productsRouter from './src/routes/productsRouter.js';
-import { login } from './src/controllers/authControllers.js';
+import authRouter from './src/routes/authRoutes.js';
+import productsRouter from './src/routes/productsRoutes.js';
 import { authentication } from './src/middlewares/authentication.js';
-import categoriesRouter from './src/routes/categoriesRouter.js';
-
-console.log('Router cargado:', categoriesRouter); 
-
+import categoriesRouter from './src/routes/categoriesRoutes.js';
 
 const app = express();
-const PORT = 3007;
+const PORT = process.env.PORT || 3007;
 
 app.use(cors({
   origin: '*',
@@ -23,8 +20,13 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.use(express.json());
-app.post('/api/login', login);
+
+//rutas publicas
+app.use('/api', authRouter);
+
+//rutas protegidas
 app.use('/auth', authentication, productsRouter);
 app.use('/categories', authentication, categoriesRouter);
 
@@ -36,6 +38,15 @@ app.use((req, res) => {
     message: `El recurso ${req.url} no existe`
   });
 });
+
+//agrego error 500 despues del 404
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    error: err.message || 'Error interno del servidor'
+  });
+});
+
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

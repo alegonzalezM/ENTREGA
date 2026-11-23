@@ -5,13 +5,23 @@ import { collection, getDocs, getDoc, doc, addDoc, deleteDoc, query, where } fro
 const col = collection(db, 'products');
 
 export const obtenerProductos = async () => {
+  try{
   const snapshot = await getDocs(col);
   return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+} catch(error){
+  console.error(`Error obteniendo la colección PRODUCTOS`, error);
+  throw error;
+}
 };
 
 export const obtenerPorId = async (id) => {
+  try{
   const d = await getDoc(doc(db, 'products', id));
   return d.exists() ? { id: d.id, ...d.data() } : null;
+} catch(error){
+   console.error(`Error obteniendo el producto con ID ${id}`, error);
+  throw error;
+}
 };
 
 export const buscarPorConsulta = async (categoria) => {
